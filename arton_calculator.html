@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ART ON · Финансовый калькулятор</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Montserrat:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-dim: #8B6F2E;
+    --gold-light: #E8C96A;
+    --bg: #0A0A0A;
+    --bg2: #111111;
+    --bg3: #1A1A1A;
+    --border: rgba(201,168,76,0.2);
+    --text: #FFFFFF;
+    --text-dim: #888888;
+    --green: #4CAF7D;
+    --red: #E05555;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 48px; }
+  .logo { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 16px; }
+  .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 600; letter-spacing: 6px; color: var(--text); }
+  .logo-o {
+    width: 36px; height: 36px;
+    border: 4px solid var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 2px;
+    position: relative; top: -2px;
+  }
+  .logo-o::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+  .subtitle { font-size: 11px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; }
+
+  /* Gold line */
+  .divider { width: 60px; height: 1px; background: var(--gold); margin: 20px auto; }
+
+  /* Grid layout */
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  /* Cards */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 28px;
+  }
+  .card-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+
+  /* Sliders */
+  .param { margin-bottom: 24px; }
+  .param:last-child { margin-bottom: 0; }
+  .param-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .param-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0.5px; }
+  .param-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--gold-light);
+  }
+  .param-unit { font-size: 11px; color: var(--text-dim); margin-left: 3px; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--bg3);
+    outline: none;
+    border-radius: 0;
+    cursor: pointer;
+    position: relative;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--gold);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+    transition: box-shadow 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(201,168,76,0.2);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--gold);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  /* Results card */
+  .results { grid-column: 1 / -1; }
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .result-cell {
+    background: var(--bg2);
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .result-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; }
+  .result-idr { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+  .result-usd { font-size: 12px; color: var(--text-dim); }
+  .c-green { color: var(--green); }
+  .c-red { color: var(--red); }
+  .c-gold { color: var(--gold-light); }
+  .c-white { color: var(--text); }
+
+  /* Occupancy bar */
+  .occ-bar-wrap { margin-top: 16px; }
+  .occ-bar-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+  .occ-bar-track { height: 4px; background: var(--bg3); position: relative; border-radius: 0; }
+  .occ-bar-fill { height: 100%; background: var(--gold); transition: width 0.3s ease; }
+
+  /* Investor block */
+  .investor { margin-top: 20px; }
+  .investor-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .investor-row:last-child { border-bottom: none; }
+  .inv-label { font-size: 11px; color: var(--text-dim); }
+  .inv-value { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--gold-light); }
+
+  /* Breakeven indicator */
+  .breakeven {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+  }
+  .be-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; transition: background 0.3s; }
+  .be-text { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+  .be-text strong { color: var(--text); font-weight: 500; }
+
+  /* Hours display */
+  .hours-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .hour-cell {
+    height: 6px;
+    background: var(--bg3);
+    border-radius: 0;
+    transition: background 0.2s;
+  }
+  .hour-cell.active { background: var(--gold); }
+
+  /* Footer */
+  .footer { text-align: center; margin-top: 36px; }
+  .footer-text { font-size: 10px; letter-spacing: 2px; color: var(--gold-dim); text-transform: uppercase; }
+
+  /* Animate numbers */
+  .result-idr, .inv-value { transition: color 0.3s; }
+
+  @media (max-width: 600px) {
+    .layout { grid-template-columns: 1fr; }
+    .results-grid { grid-template-columns: 1fr; }
+    .logo-text { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">
+      <span class="logo-text">ART</span>
+      <div class="logo-o"></div>
+      <span class="logo-text">N</span>
+    </div>
+    <div class="subtitle">Финансовый калькулятор · Bali Studio</div>
+    <div class="divider"></div>
+  </div>
+
+  <div class="layout">
+
+    <!-- Params left -->
+    <div class="card">
+      <div class="card-title">Параметры студии</div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Загрузка</span>
+          <span><span class="param-value" id="val-occ">50</span><span class="param-unit">%</span></span>
+        </div>
+        <input type="range" id="sl-occ" min="10" max="100" step="5" value="50">
+      </div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Количество комнат</span>
+          <span><span class="param-value" id="val-rooms">3</span><span class="param-unit">шт</span></span>
+        </div>
+        <input type="range" id="sl-rooms" min="1" max="5" step="1" value="3">
+      </div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Часов работы в день</span>
+          <span><span class="param-value" id="val-hours">12</span><span class="param-unit">ч</span></span>
+        </div>
+        <input type="range" id="sl-hours" min="6" max="18" step="1" value="12">
+      </div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Цена часа</span>
+          <span><span class="param-value" id="val-price">167</span><span class="param-unit">тыс IDR</span></span>
+        </div>
+        <input type="range" id="sl-price" min="50" max="400" step="5" value="167">
+      </div>
+    </div>
+
+    <!-- Params right -->
+    <div class="card">
+      <div class="card-title">Расходы в месяц</div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Аренда помещения</span>
+          <span><span class="param-value" id="val-rent">8.3</span><span class="param-unit">M IDR</span></span>
+        </div>
+        <input type="range" id="sl-rent" min="3" max="20" step="0.5" value="8.3">
+      </div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Зарплаты (фонд)</span>
+          <span><span class="param-value" id="val-salary">15</span><span class="param-unit">M IDR</span></span>
+        </div>
+        <input type="range" id="sl-salary" min="5" max="40" step="1" value="15">
+      </div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Маркетинг + прочее</span>
+          <span><span class="param-value" id="val-other">7.5</span><span class="param-unit">M IDR</span></span>
+        </div>
+        <input type="range" id="sl-other" min="1" max="20" step="0.5" value="7.5">
+      </div>
+
+      <div class="param">
+        <div class="param-header">
+          <span class="param-label">Роялти инвестору</span>
+          <span><span class="param-value" id="val-royalty">20</span><span class="param-unit">%</span></span>
+        </div>
+        <input type="range" id="sl-royalty" min="5" max="40" step="5" value="20">
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card results">
+      <div class="card-title">Результат · <span id="month-label">месяц</span></div>
+      <div class="results-grid">
+        <div class="result-cell">
+          <div class="result-label">Выручка</div>
+          <div class="result-idr c-white" id="res-rev-idr">90.0M</div>
+          <div class="result-usd" id="res-rev-usd">$5,625</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-label">Расходы</div>
+          <div class="result-idr c-red" id="res-exp-idr">−45.8M</div>
+          <div class="result-usd" id="res-exp-usd">−$2,863</div>
+        </div>
+        <div class="result-cell">
+          <div class="result-label">Чистая прибыль</div>
+          <div class="result-idr" id="res-profit-idr">44.2M</div>
+          <div class="result-usd" id="res-profit-usd">$2,763</div>
+        </div>
+      </div>
+
+      <div class="investor">
+        <div class="investor-row">
+          <span class="inv-label">Роялти инвестору / мес</span>
+          <span class="inv-value" id="inv-monthly">18.0M IDR · $1,125</span>
+        </div>
+        <div class="investor-row">
+          <span class="inv-label">Окупаемость Вар.А ($18,438)</span>
+          <span class="inv-value" id="inv-payback-a">16 мес</span>
+        </div>
+        <div class="investor-row">
+          <span class="inv-label">Окупаемость Вар.Б ($25,000)</span>
+          <span class="inv-value" id="inv-payback-b">22 мес</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakeven -->
+    <div class="breakeven">
+      <div class="be-dot" id="be-dot"></div>
+      <div class="be-text" id="be-text"></div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-text">ART ON · Creative Ecosystem Space · Bali · 2026</div>
+  </div>
+
+</div>
+
+<script>
+const RATE = 16000; // IDR per USD
+
+function fmt(n) {
+  if (Math.abs(n) >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return (n/1000).toFixed(0) + 'K';
+  return n.toFixed(0);
+}
+function fmtUSD(idr) {
+  const usd = idr / RATE;
+  return '$' + Math.round(usd).toLocaleString('en-US');
+}
+function fmtM(n) { return (n/1000000).toFixed(1) + 'M IDR'; }
+
+function get(id) { return parseFloat(document.getElementById(id).value); }
+function set(id, v) { document.getElementById(id).textContent = v; }
+
+function calc() {
+  const occ     = get('sl-occ') / 100;
+  const rooms   = get('sl-rooms');
+  const hours   = get('sl-hours');
+  const priceK  = get('sl-price'); // тысяч IDR
+  const rentM   = get('sl-rent');
+  const salaryM = get('sl-salary');
+  const otherM  = get('sl-other');
+  const royaltyPct = get('sl-royalty') / 100;
+
+  // Display slider values
+  set('val-occ',     Math.round(occ*100));
+  set('val-rooms',   rooms);
+  set('val-hours',   hours);
+  set('val-price',   priceK);
+  set('val-rent',    rentM);
+  set('val-salary',  salaryM);
+  set('val-other',   otherM);
+  set('val-royalty', Math.round(royaltyPct*100));
+
+  // Revenue: rooms × hours × 30 days × occupancy × price
+  const revenueIDR = rooms * hours * 30 * occ * priceK * 1000;
+  const expensesIDR = (rentM + salaryM + otherM) * 1_000_000;
+  const royaltyIDR = revenueIDR * royaltyPct;
+  const profitIDR = revenueIDR - expensesIDR - royaltyIDR;
+
+  // Results
+  set('res-rev-idr',  fmt(revenueIDR));
+  set('res-rev-usd',  fmtUSD(revenueIDR));
+  set('res-exp-idr',  '−' + fmt(expensesIDR + royaltyIDR));
+  set('res-exp-usd',  '−' + fmtUSD(expensesIDR + royaltyIDR));
+
+  const profitEl = document.getElementById('res-profit-idr');
+  const profitUSD = document.getElementById('res-profit-usd');
+  if (profitIDR >= 0) {
+    profitEl.className = 'result-idr c-green';
+    profitEl.textContent = fmt(profitIDR);
+    profitUSD.textContent = fmtUSD(profitIDR);
+  } else {
+    profitEl.className = 'result-idr c-red';
+    profitEl.textContent = '−' + fmt(Math.abs(profitIDR));
+    profitUSD.textContent = '−' + fmtUSD(Math.abs(profitIDR));
+  }
+
+  // Investor
+  const invPayA = 18438 * RATE;
+  const invPayB = 25000 * RATE;
+  const monthsA = royaltyIDR > 0 ? Math.ceil(invPayA / royaltyIDR) : '∞';
+  const monthsB = royaltyIDR > 0 ? Math.ceil(invPayB / royaltyIDR) : '∞';
+
+  set('inv-monthly',  fmtM(royaltyIDR) + ' · ' + fmtUSD(royaltyIDR) + '/мес');
+  set('inv-payback-a', typeof monthsA === 'number' ? monthsA + ' мес' : '∞');
+  set('inv-payback-b', typeof monthsB === 'number' ? monthsB + ' мес' : '∞');
+
+  // Breakeven
+  const beHours = (expensesIDR / (priceK * 1000)) / 30;
+  const beOcc = beHours / (rooms * hours) * 100;
+  const beDot = document.getElementById('be-dot');
+  const beText = document.getElementById('be-text');
+
+  if (occ * 100 >= beOcc) {
+    beDot.style.background = '#4CAF7D';
+    beText.innerHTML = `<strong>Выше точки безубыточности.</strong> Для окупаемости расходов нужно ${beOcc.toFixed(1)}% загрузки (${(beHours).toFixed(1)} ч/день на комнату). Текущая загрузка: ${Math.round(occ*100)}%.`;
+  } else {
+    beDot.style.background = '#E05555';
+    beText.innerHTML = `<strong>Ниже точки безубыточности.</strong> Для покрытия расходов нужно минимум ${beOcc.toFixed(1)}% загрузки (${(beHours).toFixed(1)} ч/день на комнату). Текущая: ${Math.round(occ*100)}%.`;
+  }
+
+  // Track fill for sliders
+  document.querySelectorAll('input[type=range]').forEach(sl => {
+    const pct = (sl.value - sl.min) / (sl.max - sl.min) * 100;
+    sl.style.background = `linear-gradient(to right, #C9A84C ${pct}%, #1A1A1A ${pct}%)`;
+  });
+}
+
+document.querySelectorAll('input[type=range]').forEach(sl => {
+  sl.addEventListener('input', calc);
+});
+
+calc();
+</script>
+</body>
+</html>
